@@ -13,7 +13,7 @@ pipeline = load_model()
 
 @app.get("/")
 def read_root():
-    return {"Bonjour": "Finally working!!!"}
+    return {"Bonjour": "Hello world!!!"}
 
 @app.get('/prediction/')
 def get_prediction(json_client: dict = Body({}), model: Optional[object] = Depends(load_model)):
