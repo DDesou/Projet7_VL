@@ -2,24 +2,30 @@ from fastapi.testclient import TestClient
 from main import app
 import json
 import requests
+import warnings
 
 client = TestClient(app)
 
 def read_json_file(file_path):
     with open(file_path, 'r') as json_file:
         return json.load(json_file)
-
+    
+def raise_custom_warning():
+    warning_message = "This is a custom warning message for testing."
+    warnings.warn(warning_message, category=DeprecationWarning)
 
 def test_read_root():
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {"Bonjour": "Now it works!!!"}
 
-
 def test_get_prediction():
     # Assuming your prediction endpoint is '/prediction/'
-    data1 = read_json_file("./ressources/input1.json")
-    data0 = read_json_file("./ressources/input0.json")
+    data1 = read_json_file("./tests/input1.json")
+    data0 = read_json_file("./tests/input0.json")
+
+    # Raise a custom warning
+    raise_custom_warning()
 
     # Replace with actual data for prediction
     base_url = "http://127.0.0.1:8000"
