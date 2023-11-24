@@ -56,6 +56,13 @@ jobs:
           python -m venv venv
           source venv/bin/activate
 
+      - name: Debugging
+        run: |
+          pwd
+          ls -l
+          cat main.py
+          cat test_main.py
+
       - name: Install dependencies
         run: pip install -r requirements.txt
 
