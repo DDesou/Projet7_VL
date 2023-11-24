@@ -3,6 +3,13 @@ from main import app
 import json
 import requests
 import warnings
+from sklearn.exceptions import ConvergenceWarning #, InconsistentVersionWarning
+
+# Ignore inconsistent version warnings during testing
+warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="sklearn")
+#warnings.filterwarnings("ignore", category=InconsistentVersionWarning, module="sklearn")
+
 
 client = TestClient(app)
 
