@@ -6,7 +6,7 @@ import joblib
 app = FastAPI()
 
 def load_model():
-    model_path = "model.joblib"
+    model_path = "./ressources/model.joblib"
     return joblib.load(open(model_path, "rb"))
 
 pipeline = load_model()
