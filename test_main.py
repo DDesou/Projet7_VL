@@ -24,7 +24,7 @@ def raise_custom_warning():
 def test_read_root():
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"Bonjour": "Now it works!!!"}
+    assert response.json() == {"Hello my API": "It works!!!"}
 
 def test_get_prediction():
     # Assuming your prediction endpoint is '/prediction/'
