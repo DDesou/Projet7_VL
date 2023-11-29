@@ -2,7 +2,17 @@ from fastapi import FastAPI, Body, HTTPException, Depends
 from typing import Optional
 import pandas as pd
 import joblib
-import json
+#pytonimport json
+import shap
+shap.initjs()
+
+import warnings
+
+# Suppress the specific warning
+warnings.filterwarnings("ignore", category=FutureWarning, module="pandas")
+# Filter the warning related to is_sparse deprecation
+warnings.filterwarnings("ignore", message="is_sparse is deprecated and will be removed in a future version.")
+
 
 app = FastAPI()
 
@@ -28,6 +38,10 @@ col = df_train.columns
 
 df_test2 = pd.DataFrame(pipeline[0].transform(df_test[col]), columns = col)
 df_test2 = df_test2.set_index(pd.Series(list(df_test.index)))
+
+Xtest_shap = pd.DataFrame(pipeline[0].transform(df_test2[col]), columns = col, index=df_test2.index)
+explainer_test = shap.TreeExplainer(pipeline[1], pipeline[0].transform(df_test2), check_additivity=False)
+
 
 # @app decorators
 @app.get("/")
@@ -63,3 +77,24 @@ async def get_ids():
 @app.get("/get_feat")
 async def get_feat():
     return {"data": feat}
+
+
+
+
+
+@app.get('/get_shap')
+async def get_shap(param_name: int, model: Optional[object] = Depends(load_model)):
+    try:
+        #json_client = df_test2.loc[param_name].to_json()
+        #df_one_client = pd.Series(json_client).to_frame().transpose()
+        #df = df_test2.loc[[param_name]]
+        #explainer = shap.TreeExplainer(model[1])
+        #shap_values = explainer.shap_values(df, check_additivity=False)
+        shap_values = explainer_test(Xtest_shap.loc[[param_name]], check_additivity=False)
+        # Convert SHAP values to list of ndarrays
+        return {'values': shap_values.values.tolist(), 
+                'feat':shap_values.feature_names, 
+                'data':shap_values.data.tolist(),
+                'base':shap_values.base_values.tolist()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
