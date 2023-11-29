@@ -5,6 +5,7 @@ import joblib
 #pytonimport json
 import shap
 shap.initjs()
+import numpy as np
 
 import warnings
 
@@ -33,6 +34,10 @@ df_train = df_train.set_index('SK_ID_CURR')
 to_keep = ['TARGET', 'proba']
 cm_met1 = df_train.drop(columns=[ele for ele in df_train if ele not in to_keep])
 df_train = df_train.drop(columns=['TARGET', 'proba'])
+
+index_x0 = list(cm_met1.index[cm_met1['TARGET']==0])
+index_x1 = list(cm_met1.index[cm_met1['TARGET']==1])
+
 feat = list(df_train.columns)
 col = df_train.columns
 
@@ -79,17 +84,21 @@ async def get_feat():
     return {"data": feat}
 
 
-
-
+@app.get("/get_kde")
+async def get_kde(param_name: str):
+    try:
+        x0 = df_train[param_name].drop(index_x0)
+        x0 = x0.dropna()
+        x1 = df_train[param_name].drop(index_x1)
+        x1 = x1.dropna()
+        return {'feat0': x0.tolist(), 
+                'feat1':x1.tolist()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 @app.get('/get_shap')
 async def get_shap(param_name: int, model: Optional[object] = Depends(load_model)):
     try:
-        #json_client = df_test2.loc[param_name].to_json()
-        #df_one_client = pd.Series(json_client).to_frame().transpose()
-        #df = df_test2.loc[[param_name]]
-        #explainer = shap.TreeExplainer(model[1])
-        #shap_values = explainer.shap_values(df, check_additivity=False)
         shap_values = explainer_test(Xtest_shap.loc[[param_name]], check_additivity=False)
         # Convert SHAP values to list of ndarrays
         return {'values': shap_values.values.tolist(), 
