@@ -1,15 +1,14 @@
-from fastapi import FastAPI, Body, HTTPException, Depends
+import warnings
+import numpy as np
 from typing import Optional
+from fastapi import FastAPI, Body, HTTPException, Depends
 import pandas as pd
 import joblib
 #pytonimport json
 import shap
 shap.initjs()
-import numpy as np
 
-import warnings
-
-# Suppress the specific warning
+#Suppress the specific warning
 warnings.filterwarnings("ignore", category=FutureWarning, module="pandas")
 # Filter the warning related to is_sparse deprecation
 warnings.filterwarnings("ignore", message="is_sparse is deprecated and will be removed in a future version.")
@@ -53,6 +52,7 @@ explainer_test = shap.TreeExplainer(pipeline[1], pipeline[0].transform(df_test2)
 def read_root():
     return {"Hello my API": "It works!!!"}
 
+
 @app.get('/get_json/')
 async def get_json(param_name: int):
     try:
@@ -95,6 +95,7 @@ async def get_kde(param_name: str):
                 'feat1':x1.tolist()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
 
 @app.get('/get_shap')
 async def get_shap(param_name: int, model: Optional[object] = Depends(load_model)):
