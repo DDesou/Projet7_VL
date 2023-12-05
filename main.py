@@ -43,8 +43,8 @@ col = df_train.columns
 df_test2 = pd.DataFrame(pipeline[0].transform(df_test[col]), columns = col)
 df_test2 = df_test2.set_index(pd.Series(list(df_test.index)))
 
-Xtest_shap = pd.DataFrame(pipeline[0].transform(df_test2[col]), columns = col, index=df_test2.index)
-explainer_test = shap.TreeExplainer(pipeline[1], pipeline[0].transform(df_test2), check_additivity=False)
+Xtest_shap = pd.DataFrame(pipeline[0].transform(df_test[col]), columns = col, index=ids)
+explainer_test = shap.TreeExplainer(pipeline[1], pipeline[0].transform(df_test), check_additivity=False)
 
 
 # @app decorators
@@ -58,6 +58,17 @@ async def get_json(param_name: int):
     try:
         json_client = df_test2.loc[param_name].to_json()
         return {'data' : json_client}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Item not found with id: {id}")
+
+
+@app.get('/get_test/')
+async def get_test(param_name: int):
+    try:
+        test = df_test.loc[param_name].to_json()
+        return {'data' : test}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
     except KeyError:
